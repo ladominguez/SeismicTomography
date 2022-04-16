@@ -1,12 +1,12 @@
 clear all
 close all
 
-N = 64;  % Numero de celdas
-R = 90; % Número de rayos 
+N = 32;  % Numero de celdas
+R = 50; % Número de rayos 
 Ni = 201; % Numero de puntos de interpolación 
 lambda = .1;
 W  = 1;
-Wa = N/4;
+Wa = N/8;
 G  = zeros(R,N*N);
 Gv = zeros(N,N);
 S  = zeros(N,N); 
@@ -109,19 +109,17 @@ hold on
 for k =1:R
     plot([xr(k,1) xr(k,2)], [yr(k,1) yr(k,2)],'r','LineWidth',2)
 end
-axis tight
+
 
 subplot(2,3,2)
 imagesc('XData',x+(W/2),'YData',y+(W/2),'CData',1- Gv'./max(max(Gv)))
 colormap(gray)
-axis tight
 
 
 subplot(2,3,4)
 imagesc('XData',x+(W/2),'YData',y+(W/2),'CData',S)
 colormap(gray)
 colorbar()
-axis tight
 
 minv = pinv(G)*t;
 
@@ -129,10 +127,10 @@ subplot(2,3,5)
 imagesc('XData',x+(W/2),'YData',y+(W/2),'CData',reshape(minv,N,N))
 colormap(gray)
 colorbar()
-axis tight
+
 
 %% 
-alpha = 1;
+alpha = 0.1;
 Gdls  = [G; alpha*eye(size(G,2))];
 d     = [t];
 
@@ -144,19 +142,10 @@ m_alpha   = zeros(size(G,2), 1);
 for i=1:k
     fi(i)   = si(i)^2/(si(i)^2 + alpha^2);
     aux     = U(:,i)'*d*fi(i)/si(i);
-    m_alpha = m_alpha+aux*V(:,i);
+    m_alpha = aux*V(:,i);
         
 end
 
-subplot(2,3,3)
-plot(fi,'ko')
-ylim([0,1])
-
-subplot(2,3,6)
-imagesc('XData',x+(W/2),'YData',y+(W/2),'CData',reshape(m_alpha,N,N))
-colormap(gray)
-colorbar()
-axis tight
 
 return
 
