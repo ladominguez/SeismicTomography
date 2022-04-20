@@ -1,10 +1,11 @@
 clear all
 close all
 
-N = 64;  % Numero de celdas
-R = 90; % Número de rayos 
+N = 16;  % Numero de celdas
+R = 200; % Número de rayos 
 Ni = 201; % Numero de puntos de interpolación 
-lambda = .1;
+noise = 0.05;
+lambda = .00001;
 W  = 1;
 Wa = N/4;
 G  = zeros(R,N*N);
@@ -17,7 +18,7 @@ x_max = W*N;
 y_max = W*N;
 
 S0 = (1/x_max);
-dS = 0.05*S0;
+dS = 0.02*S0;
 dSdz = 0.001;
 
 
@@ -25,7 +26,7 @@ dSdz = 0.001;
 for i = 1:N
     for j = 1:N
         m(i,j) = mod(i+j,2)-(W/2);
-        %S(i,j) = S0 + (-1)^(i+j)*dS;  % Checkboar (+/-)dV
+        %S(i,j) = S0 + (-1)^(fix(i/4)+fix(j/4))*dS;  % Checkboar (+/-)dV
         %S(i,j) = S0 + (dSdz)*(i*W);    % Gradient
         %S(i,j) = S0 + (dSdz)*(i*W + j*W); % Gradient diagonal
         
@@ -99,6 +100,8 @@ for k = 1:R
     
 end
 
+t1 = t;
+t  = t + + noise*mean(t)*randn(size(t));
 
 figure(1)
 setwin([56          67        1374         802])
@@ -126,13 +129,14 @@ axis tight
 minv = pinv(G)*t;
 
 subplot(2,3,5)
-imagesc('XData',x+(W/2),'YData',y+(W/2),'CData',reshape(minv,N,N))
+%imagesc('XData',x+(W/2),'YData',y+(W/2),'CData',reshape(minv,N,N))
+contourf(reshape(minv,N,N))
 colormap(gray)
 colorbar()
 axis tight
 
 %% 
-alpha = 1;
+alpha = 1e-2;
 Gdls  = [G; alpha*eye(size(G,2))];
 d     = [t];
 
@@ -153,10 +157,16 @@ plot(fi,'ko')
 ylim([0,1])
 
 subplot(2,3,6)
-imagesc('XData',x+(W/2),'YData',y+(W/2),'CData',reshape(m_alpha,N,N))
+%imagesc('XData',x+(W/2),'YData',y+(W/2),'CData',reshape(m_alpha,N,N))
+contourf(reshape(m_alpha,N,N));
 colormap(gray)
 colorbar()
 axis tight
+
+figure(2)
+plot(sortrows(t1))
+hold on
+plot(sortrows(t),'k+')
 
 return
 

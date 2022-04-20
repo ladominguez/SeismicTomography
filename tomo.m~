@@ -1,12 +1,13 @@
 clear all
 close all
 
-N = 32;  % Numero de celdas
-R = 50; % Número de rayos 
+N = 16;  % Numero de celdas
+R = 268; % Número de rayos 
 Ni = 201; % Numero de puntos de interpolación 
+noise = 0.05;
 lambda = .1;
 W  = 1;
-Wa = N/8;
+Wa = N/4;
 G  = zeros(R,N*N);
 Gv = zeros(N,N);
 S  = zeros(N,N); 
@@ -17,7 +18,7 @@ x_max = W*N;
 y_max = W*N;
 
 S0 = (1/x_max);
-dS = 0.05*S0;
+dS = 0.02*S0;
 dSdz = 0.001;
 
 
@@ -25,19 +26,19 @@ dSdz = 0.001;
 for i = 1:N
     for j = 1:N
         m(i,j) = mod(i+j,2)-(W/2);
-        %S(i,j) = S0 + (-1)^(i+j)*dS;  % Checkboar (+/-)dV
+        %S(i,j) = S0 + (-1)^(fix(i/4)+fix(j/4))*dS;  % Checkboar (+/-)dV
         %S(i,j) = S0 + (dSdz)*(i*W);    % Gradient
-        %S(i,j) = S0 + (dSdz)*(i*W + j*W); % Gradient diagonal
+        S(i,j) = S0 + (dSdz)*(i*W + j*W); % Gradient diagonal
         
-        if i >= N/2-Wa && i<= N/2+Wa
-            if j >= N/2-Wa && j<=N/2+Wa
-                S(i,j) = 1;%S0 - dS;
-            else
-                S(i,j) = 0;%S0;
-            end
-        else
-            S(i,j) = 0;%S0;
-        end
+%         if i >= N/2-Wa && i<= N/2+Wa
+%             if j >= N/2-Wa && j<=N/2+Wa
+%                 S(i,j) = 1;%S0 - dS;
+%             else
+%                 S(i,j) = 0;%S0;
+%             end
+%         else
+%             S(i,j) = 0;%S0;
+%         end
     end 
 end
 
@@ -98,7 +99,7 @@ for k = 1:R
     
     
 end
-
+t = t + + 0.02*mean(t)*randn(size(t));
 
 figure(1)
 setwin([56          67        1374         802])
@@ -109,28 +110,31 @@ hold on
 for k =1:R
     plot([xr(k,1) xr(k,2)], [yr(k,1) yr(k,2)],'r','LineWidth',2)
 end
-
+axis tight
 
 subplot(2,3,2)
 imagesc('XData',x+(W/2),'YData',y+(W/2),'CData',1- Gv'./max(max(Gv)))
 colormap(gray)
+axis tight
 
 
 subplot(2,3,4)
 imagesc('XData',x+(W/2),'YData',y+(W/2),'CData',S)
 colormap(gray)
 colorbar()
+axis tight
 
 minv = pinv(G)*t;
 
 subplot(2,3,5)
-imagesc('XData',x+(W/2),'YData',y+(W/2),'CData',reshape(minv,N,N))
+%imagesc('XData',x+(W/2),'YData',y+(W/2),'CData',reshape(minv,N,N))
+contourf(reshape(minv,N,N))
 colormap(gray)
 colorbar()
-
+axis tight
 
 %% 
-alpha = 0.1;
+alpha = 1e-2;
 Gdls  = [G; alpha*eye(size(G,2))];
 d     = [t];
 
@@ -142,10 +146,20 @@ m_alpha   = zeros(size(G,2), 1);
 for i=1:k
     fi(i)   = si(i)^2/(si(i)^2 + alpha^2);
     aux     = U(:,i)'*d*fi(i)/si(i);
-    m_alpha = aux*V(:,i);
+    m_alpha = m_alpha+aux*V(:,i);
         
 end
 
+subplot(2,3,3)
+plot(fi,'ko')
+ylim([0,1])
+
+subplot(2,3,6)
+%imagesc('XData',x+(W/2),'YData',y+(W/2),'CData',reshape(m_alpha,N,N))
+contourf(reshape(m_alpha,N,N));
+colormap(gray)
+colorbar()
+axis tight
 
 return
 
