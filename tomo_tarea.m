@@ -2,11 +2,12 @@ clear all
 close all
 
 N = 16;   % Número de celdas
-R = 500;  % Número de rayos 
+R = 250;  % Número de rayos 
 Ni = 201; % Número de puntos de interpolación 
 
-noise  = 0.05;
-lambda = 0.01;
+noise  = 0.01;
+alpha = 0.1;
+%lambda = 10;
 
 W  = 1;     
 Wa = N/8;   % Ancho de la espiga
@@ -68,7 +69,6 @@ x = 0:x_max-W;
 y = 0:y_max-W;
 
 
-
 %% Creación de N rayos de forma aleatoria uniformente distribuidos
 
 dir = rand(1,R) - 0.5;
@@ -83,8 +83,6 @@ for k = 1:R
         xr(k,:) = [x_max*rand(1) x_max*rand(1)];
         yr(k,:) = [y_max, 0];
     end
-    
-
 end
 
 slope = (yr(:,2) - yr(:,1))./(xr(:,2)-xr(:,1));
@@ -93,14 +91,31 @@ b     = yr(:,1) -slope.*xr(:,1);
 index = zeros(Ni-1,2);
 
 %% Tarea - Creación de la matriz G
-%%
+% es esta sección deberás de escribir un código que asigne valores a la
+% matriz G. En el que cada elemento de la matrix debe de contener la
+% longitud del rayo que lo atraviesa.
+% Escriibe tu código aquí
 
-% agregar ruido
+for rr = 1:R
+        for ii = 1:Ni
+            aplicar el teorema pitagoras
+        end
+    end
+end
+
+
+
+%% FIN - sección de tarea
+
+
+% Se argega ruido a los datos
 t1 = t;
 t  = t + + noise*mean(t)*randn(size(t));
 
+%% Graficación
 figure(1)
-setwin([56          67        1374         802])
+
+set(gcf,'OuterPosition',[56   67  1374   802])
 subplot(2,3,1)
 imagesc('XData',x+(W/2),'YData',y+(W/2),'CData',m)
 title('Reticula y trazado de rayos')
@@ -131,12 +146,16 @@ minv = pinv(G)*t;
 subplot(2,3,5)
 %imagesc('XData',x+(W/2),'YData',y+(W/2),'CData',reshape(minv,N,N))
 contourf(reshape(minv,N,N))
+title('Inversión mediante la pseudo inversa')
 colormap(gray)
 colorbar()
 axis tight
 
-%% 
-alpha = 1e-2;
+%% SVD Damped solution - Tikhonoc regularizatiion
+% Ver capítulo 4, sección 4.2. aster, Paramer estimation and inverse theory
+
+
+
 Gdls  = [G; alpha*eye(size(G,2))];
 d     = [t];
 
@@ -144,6 +163,9 @@ d     = [t];
 k         = min(size(G,1), size(G,2));
 si        = diag(S);
 m_alpha   = zeros(size(G,2), 1);
+
+%% Factoees de filtro
+% Ver ecuación 4.17, Aster, Paremeter Estimation and Inverse Theory 
 
 for i=1:k
     fi(i)   = si(i)^2/(si(i)^2 + alpha^2);
@@ -155,28 +177,34 @@ end
 subplot(2,3,3)
 plot(fi,'ko')
 ylim([0,1])
+title('Factores de Filtro')
+xlabel('indice i')
+ylabel('$f_i=\frac{s^2_i}{s^2_i+\alpha^2}$','Interpreter','Latex','FontSize',14)
 
 subplot(2,3,6)
 %imagesc('XData',x+(W/2),'YData',y+(W/2),'CData',reshape(m_alpha,N,N))
 contourf(reshape(m_alpha,N,N));
 colormap(gray)
 colorbar()
+title('Regularización')
 axis tight
 
 figure(2)
 [ts ind] = sortrows(t1);
-plot(ts)
+plot(ts,'k','Linewidth',2)
 hold on
 plot(t(ind),'k+')
+grid
+xlabel('Número de observación')
+ylabel('Tiempo')
 
+legend('Sin ruido', 'Con ruido')
+title('Datos')
+set(gcf,'Color','w')
+
+set(gca,'FontSize',14,'FontName','Helvica')
+xlabel(get(get(gca,'xlabel'),'String'),'FontSize',14,'FontWeight','normal','FontAngle','normal','FontName','Helvica') 
+ylabel(get(get(gca,'ylabel'),'String'),'FontSize',14,'FontWeight','normal','FontAngle','normal','FontName','Helvica') 
 return
 
 
-% archive
-m_inv = inv(G'*G)*G'*t;
-m_inv = reshape(m_inv, N,N);
-
-Gdlsq  = [G;lambda*eye(N*N)];
-
-m_dslq = pinv(G)*t;
-m_dslq = reshape(m_dslq, N,N);
