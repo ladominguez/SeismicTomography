@@ -1,16 +1,15 @@
 clear all
 close all
 
-N = 16;   % Número de celdas
-R = 250;  % Número de rayos 
-Ni = 201; % Número de puntos de interpolación 
+N = 9;   % Número de celdas
+R = 20;  % Número de rayos 
+Ni = 201; % Número de puntos de interpolación   
+Wa = N/8;   % Ancho de la espiga
 
 noise  = 0.01;
 alpha = 0.1;
-%lambda = 10;
+W  = 1;   
 
-W  = 1;     
-Wa = N/8;   % Ancho de la espiga
 G  = zeros(R,N*N);
 Gv = zeros(N,N);
 S  = zeros(N,N); 
@@ -42,7 +41,7 @@ for i = 1:N
         %% 1. Checkboard
         S(i,j) = S0 + (-1)^(fix(i/2)+fix(j/2))*dS;  % Checkboar (+/-)dV
         
-        %% 2. gRadiente vertical.
+        %% 2. Gradiente vertical.
         %S(i,j) = S0 + (dSdz)*(i*W);    % Gradient
        
         %% 3. Gradiente diagonal
@@ -96,15 +95,10 @@ index = zeros(Ni-1,2);
 % longitud del rayo que lo atraviesa.
 % Escriibe tu código aquí
 
-for rr = 1:R
-        for ii = 1:Ni
-            aplicar el teorema pitagoras
-        end
-    end
-end
 
 
 
+ 
 %% FIN - sección de tarea
 
 
@@ -118,7 +112,7 @@ figure(1)
 set(gcf,'OuterPosition',[56   67  1374   802])
 subplot(2,3,1)
 imagesc('XData',x+(W/2),'YData',y+(W/2),'CData',m)
-title('Reticula y trazado de rayos')
+title('Reticula y trazado de rayos', 'fontsize', 14)
 hold on
 
 
@@ -131,7 +125,7 @@ subplot(2,3,2)
 imagesc('XData',x+(W/2),'YData',y+(W/2),'CData',1- Gv'./max(max(Gv)))
 colormap(gray)
 axis tight
-title('Matriz G')
+title('Matriz G', 'fontsize', 14)
 
 
 subplot(2,3,4)
@@ -139,19 +133,19 @@ imagesc('XData',x+(W/2),'YData',y+(W/2),'CData',S)
 colormap(gray)
 colorbar()
 axis tight
-title('Modelo de velocidades')
+title('Modelo de velocidades', 'fontsize', 14)
 
 minv = pinv(G)*t;
 
 subplot(2,3,5)
 %imagesc('XData',x+(W/2),'YData',y+(W/2),'CData',reshape(minv,N,N))
 contourf(reshape(minv,N,N))
-title('Inversión mediante la pseudo inversa')
+title('Inversión mediante la pseudo inversa', 'fontsize', 14)
 colormap(gray)
 colorbar()
 axis tight
 
-%% SVD Damped solution - Tikhonoc regularizatiion
+%% SVD Damped solution - Tikhonov regularizatiion
 % Ver capítulo 4, sección 4.2. aster, Paramer estimation and inverse theory
 
 
@@ -164,7 +158,7 @@ k         = min(size(G,1), size(G,2));
 si        = diag(S);
 m_alpha   = zeros(size(G,2), 1);
 
-%% Factoees de filtro
+%% Factores de filtro
 % Ver ecuación 4.17, Aster, Paremeter Estimation and Inverse Theory 
 
 for i=1:k

@@ -1,9 +1,9 @@
 clear all
 close all
 
-N = 32;   % Número de celdas
-R = 500;  % Número de rayos 
-Ni = 201; % Número de puntos de interpolación 
+N = 16;   % NÃºmero de celdas
+R = 500;  % NÃºmero de rayos 
+Ni = 201; % NÃºmero de puntos de interpolaciÃ³n 
 
 noise  = 0.05;
 lambda = 0.01;
@@ -27,7 +27,7 @@ dSdz = 0.001;
 
 % Create checkboard
 % Selecciona algeun modelo que te interese. Descomentandolo y comentando
-% los modelos restantes. Estás son las opciiones.
+% los modelos restantes. EstÃ¡s son las opciiones.
 
 % 1. Checkboard. 
 % 2. Gradiente vertical. 
@@ -39,7 +39,7 @@ for i = 1:N
         m(i,j) = mod(i+j,2)-(W/2);
         
         %% 1. Checkboard
-        %S(i,j) = S0 + (-1)^(fix(i/2)+fix(j/2))*dS;  % Checkboar (+/-)dV
+        S(i,j) = S0 + (-1)^(fix(i/2)+fix(j/2))*dS;  % Checkboar (+/-)dV
         
         %% 2. gradiente vertical.
         %S(i,j) = S0 + (dSdz)*(i*W);    % Gradient
@@ -48,15 +48,15 @@ for i = 1:N
         %S(i,j) = S0 + (dSdz)*(i*W + j*W); % Gradient diagonal
         
         %% 4. Spike
-        if i >= N/2-Wa && i<= N/2+Wa
-            if j >= N/2-Wa && j<=N/2+Wa
-                S(i,j) = 1;%S0 - dS;
-            else
-                S(i,j) = 0;%S0;
-            end
-        else
-            S(i,j) = 0;%S0;
-        end
+%         if i >= N/2-Wa && i<= N/2+Wa
+%             if j >= N/2-Wa && j<=N/2+Wa
+%                 S(i,j) = 1;%S0 - dS;
+%             else
+%                 S(i,j) = 0;%S0;
+%             end
+%         else
+%             S(i,j) = 0;%S0;
+%         end
 
 % ------------------------------- end spike ------------------
     end 
@@ -69,7 +69,7 @@ y = 0:y_max-W;
 
 
 
-%% Creación de N rayos de forma aleatoria uniformente distribuidos
+%% CreaciÃ³n de N rayos de forma aleatoria uniformente distribuidos
 
 dir = rand(1,R) - 0.5;
 xr = zeros(R,2);
@@ -92,7 +92,7 @@ b     = yr(:,1) -slope.*xr(:,1);
 
 index = zeros(Ni-1,2);
 
-%% Tarea - Creación de la matriz G
+%% Tarea - CreaciÃ³n de la matriz G
 %%
 
 % agregar ruido
